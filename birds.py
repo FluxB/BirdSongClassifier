@@ -41,23 +41,24 @@ for row in f:
 
 counter =0
 for row in data:
-	catNumber = row[labelMap["Catalogue number"]]
-	url = "http://www.xeno-canto.org/"+catNumber+"/download"
-
-	site = urllib.urlopen(url)
-	meta = site.info()
-	size = int(meta.getheaders("Content-Length")[0])
-	print "next file: "+url
-	print "\tsize="+str(size)
-	if  size <= maxSize:
-		print "\tStart dowloading file " + url
-		urllib.urlretrieve (url, prefix+catNumber+".mp3")
-		print "\tFile has been downloaded."
-		counter += 1
-		if counter >= maxNumber:
-			break
-	else:
-		print "\tFile is too large."
+    catNumber=row[labelMap["Catalogue number"]]
+    if os.path.isfile(prefix+catNumber+".mp3"):
+        continue
+    url="http://www.xeno-canto.org/"+catNumber+"/download"
+    site=urllib.urlopen(url)
+    meta=site.info()
+    size=int(meta.getheaders("Content-Length")[0])
+    print "next file: "+url
+    print "\tsize="+str(size)
+    if  size <= maxSize:
+        print "\tStart dowloading file " + url
+        urllib.urlretrieve (url, prefix+catNumber+".mp3")
+        print "\tFile has been downloaded."
+        counter += 1
+        if counter >= maxNumber:
+            break
+    else:
+        print "\tFile is too large."
 
 
 
