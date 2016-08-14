@@ -1,0 +1,7 @@
+/Users/Felix/Documents/BirdData/common_blackbird/330200.mp3 0
+/Users/Felix/Documents/BirdData/common_blackbird/330203.mp3 0
+/Users/Felix/Documents/BirdData/common_blackbird/330197.mp3 0
+/Users/Felix/Documents/BirdData/common_blackbird/329793.mp3 0
+/Users/Felix/Documents/BirdData/common_blackbird/244129.mp3 0
+/Users/Felix/Documents/BirdData/common_blackbird/320979.mp3 0
+/Users/Felix/Documents/BirdData/common_blackbird/314894.mp3 0

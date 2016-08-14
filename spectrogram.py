@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 def spectrogram(y):
-    spec = librosa.core.stft(y)
+    spec = librosa.core.stft(y, n_fft=1024)
     return np.abs(spec)
 
 
@@ -29,4 +29,8 @@ if __name__ == "__main__":
         plt.title(line)
         plt.colorbar(format='%+2.0f dB')
         plt.tight_layout()
+        plt.show()
+        plt.imshow(librosa.logamplitude(spec**2,
+                                        ref_power=np.max),
+                                        interpolation='none')
         plt.show()
