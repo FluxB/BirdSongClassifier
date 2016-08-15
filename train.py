@@ -1,5 +1,6 @@
 import sys
 from preprocessor import Preprocessor
+from augmentation import AugmentTransform
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -36,9 +37,11 @@ paths_batches = np.array_split(paths, nr_of_batches)
 labels_batches = np.array_split(labels, nr_of_batches)
 
 preprocessor = Preprocessor(10)
+augment = AugmentTransform(20)
 
 for path_batch, label_batch in zip(paths_batches, labels_batches):
     spectrograms_batch = preprocessor.load_and_preprocess(path_batch)
+    spectrograms_batch = augment.augment_transform(spectrograms_batch)
     for spec in spectrograms_batch:
         print(spec.shape)
         plt.imshow(spec)
