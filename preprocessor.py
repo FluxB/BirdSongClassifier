@@ -2,6 +2,7 @@ import librosa
 from spectrogram import spectrogram
 import random
 import numpy as np
+import time
 
 
 class Preprocessor(object):
@@ -21,15 +22,15 @@ class Preprocessor(object):
 
     def __load_wav(self, wav_path):
         print("Loading wav file: ", wav_path)
-        random_offset = random.uniform(0, self.duration) # augment in time direction!
-        y, sr = librosa.load(wav_path, offset=random_offset)
-        
+        y, sr = librosa.load(wav_path)
+    
         samples_per_slice = sr * self.duration
-        nr_slices = y.shape[0] // samples_per_slice
-        
-        y_slices = np.array_split(y, nr_slices)
+        random_offset = random.randint(0, y.shape[0] - samples_per_slice)
 
-        spectrograms = [spectrogram(y_slice) for y_slice in y_slices]
+        y_slice = y[random_offset : (random_offset + samples_per_slice)]
+        
+        spectrograms = [spectrogram(y_slice)]  # keep list formulation, if we want to use different preprocessing scheme
+
 
         return spectrograms
 
