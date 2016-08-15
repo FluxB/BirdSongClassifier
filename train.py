@@ -1,6 +1,7 @@
 import sys
 from preprocessor import Preprocessor
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def load_labels(label_path):
@@ -38,4 +39,8 @@ preprocessor = Preprocessor(10)
 
 for path_batch, label_batch in zip(paths_batches, labels_batches):
     spectrograms_batch = preprocessor.load_and_preprocess(path_batch)
-
+    for spec in spectrograms_batch:
+        print(spec.shape)
+        plt.imshow(spec)
+        plt.show()
+    

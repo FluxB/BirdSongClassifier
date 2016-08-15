@@ -31,7 +31,6 @@ class Preprocessor(object):
         
         spectrograms = [spectrogram(y_slice)]  # keep list formulation, if we want to use different preprocessing scheme
 
-
         return spectrograms
 
     def __preprocess(self, spectrograms):
@@ -40,6 +39,6 @@ class Preprocessor(object):
             preprocessed_spec = spec
             preprocessed_spec = np.log(spec**2)
             preprocessed_spec /= np.max(preprocessed_spec)
-            preprocessed_spectrograms.extend(preprocessed_spec)
+            preprocessed_spectrograms.extend([preprocessed_spec])
 
         return preprocessed_spectrograms
