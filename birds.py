@@ -40,10 +40,14 @@ for row in f:
 	i += 1
 
 counter =0
+print labelMap
 for row in data:
     catNumber=row[labelMap["Catalogue number"]]
     if os.path.isfile(prefix+catNumber+".mp3"):
         continue
+    common_name = row[labelMap["Common name"]]
+    if not os.path.isdir(prefix+common_name):
+        os.mkdir(prefix+common_name)
     url="http://www.xeno-canto.org/"+catNumber+"/download"
     site=urllib.urlopen(url)
     meta=site.info()
@@ -52,7 +56,7 @@ for row in data:
     print "\tsize="+str(size)
     if  size <= maxSize:
         print "\tStart dowloading file " + url
-        urllib.urlretrieve (url, prefix+catNumber+".mp3")
+        urllib.urlretrieve (url, prefix+common_name+"/"+catNumber+".mp3")
         print "\tFile has been downloaded."
         counter += 1
         if counter >= maxNumber:
