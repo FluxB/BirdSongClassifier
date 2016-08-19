@@ -39,7 +39,7 @@ for folder in folder_names:
         name, ftype = wav.split(".")
         out_fname = out_path + name + ".npy"
         np.save(out_fname, y)
-        f_label.write(out_fname + " " + str(label_dict[folder]))
-        f_meta.write(out_fname + "," + str(sr) + "," + str(y.shape[0]))
+        f_label.write(out_fname + " " + str(label_dict[folder]) + "\n")
+        f_meta.write(out_fname + "," + str(sr) + "," + str(y.shape[0]) + "\n")
 
 pickle.dump(label_dict, open("label_dict.pickle", "wb"))
