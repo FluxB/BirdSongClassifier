@@ -10,11 +10,11 @@ class Preprocessor(object):
     def __init__(self, duration):
         self.duration = duration
 
-    def load_and_preprocess(self, batch_wav_paths):
+    def load_and_preprocess(self, batch_sample_paths):
         preprocessed_spectrograms = []
-        for wav_path in batch_wav_paths:
-            wav_path = wav_path.strip()
-            specs = self.load_sample(wav_path)
+        for sample_path in batch_sample_paths:
+            sample_path = sample_path.strip()
+            specs = self.load_sample(sample_path)
             preprocessed_spectrograms.extend(self.preprocess(specs))
 
         return preprocessed_spectrograms
@@ -32,6 +32,7 @@ class Preprocessor(object):
         spectrograms = [spectrogram(y_slice)]  # keep list formulation, if we want to use different preprocessing scheme
 
         return spectrograms
+
 
     def preprocess(self, spectrograms):
         preprocessed_spectrograms = []

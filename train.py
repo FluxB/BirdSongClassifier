@@ -16,18 +16,25 @@ class Bird(object):
         self.queue_size = 2048
         self.nr_epoch = 1
         self.preprocessor = Preprocessor(10)
-        self.augmenter = AugmentTransform(20)
+        self.augmenter = AugmentTransform(20, 10)
+        self.inverse_labels = {}
 
 
     def load_labels(self, label_path):
         f = open(label_path, "r")
         paths = []
         labels = []
+        self.inverse_labels = {}
         for line in f:
+            line = line.strip()
             (path, label) = line.split(" ")
             paths.append(path)
             labels.append(label)
+            self.inverse_labels.setdefault(label, []).append(path)
 
+        self.augmenter.configure_same_class_augmentation(self.inverse_labels,
+                                                         self.preprocessor,
+                                                         samples_to_add=[1, 2])
         return (paths, labels)
 
 
@@ -64,7 +71,7 @@ class Bird(object):
         label = self.labels[r]
         sample = self.preprocessor.load_sample(path)
         spec = self.preprocessor.preprocess(sample)
-        spec = self.augmenter.augment_transform(spec)
+        spec = self.augmenter.augment_transform(spec, label)
         return (spec[0], label)
 
     
