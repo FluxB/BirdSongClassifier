@@ -14,28 +14,26 @@ class Preprocessor(object):
         preprocessed_spectrograms = []
         for wav_path in batch_wav_paths:
             wav_path = wav_path.strip()
-            specs = self.__load_wav(wav_path)
-            preprocessed_spectrograms.extend(self.__preprocess(specs))
+            specs = self.load_sample(wav_path)
+            preprocessed_spectrograms.extend(self.preprocess(specs))
 
         return preprocessed_spectrograms
             
 
-    def __load_wav(self, wav_path):
-        print("Loading wav file: ", wav_path)
-        # y, sr = librosa.load(wav_path)
-        y = np.load(wav_path)
+    def load_sample(self, sample_path):
+        print("Loading wav file: ", sample_path)
+        y = np.load(sample_path)
         sr = 22050
     
         samples_per_slice = sr * self.duration
-        # random_offset = random.randint(0, y.shape[0] - samples_per_slice)
 
-        y_slice = y[0:samples_per_slice]  # y[random_offset : (random_offset + samples_per_slice)]
+        y_slice = y[0:samples_per_slice]
         
         spectrograms = [spectrogram(y_slice)]  # keep list formulation, if we want to use different preprocessing scheme
 
         return spectrograms
 
-    def __preprocess(self, spectrograms):
+    def preprocess(self, spectrograms):
         preprocessed_spectrograms = []
         for spec in spectrograms:
             preprocessed_spec = spec

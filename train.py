@@ -3,47 +3,90 @@ from preprocessor import Preprocessor
 from augmentation import AugmentTransform
 import numpy as np
 import matplotlib.pyplot as plt
+import multiprocessing as mp
+import time
+import random
 
 
-def load_labels(label_path):
-    f = open(label_path, "r")
-    paths = []
-    labels = []
-    for line in f:
-        (path, label) = line.split(" ")
-        paths.append(path)
-        labels.append(label)
+class Bird(object):
 
-    return (paths, labels)
-
-
-label_path = sys.argv[1]
-batch_size = 2
+    def __init__(self, label_path):
+        self.label_path = sys.argv[1]
+        self.batch_size = 32
+        self.queue_size = 2048
+        self.nr_epoch = 1
+        self.preprocessor = Preprocessor(10)
+        self.augmenter = AugmentTransform(20)
 
 
-(paths, labels) = load_labels(label_path)
-nr_files = len(paths)
+    def load_labels(self, label_path):
+        f = open(label_path, "r")
+        paths = []
+        labels = []
+        for line in f:
+            (path, label) = line.split(" ")
+            paths.append(path)
+            labels.append(label)
 
-mask = np.arange(nr_files)
+        return (paths, labels)
 
-np.random.shuffle(mask)
 
-paths = np.array(paths)[mask]
-labels = np.array(labels)[mask]
+    def load_data(self):
+        (paths, labels) = self.load_labels(self.label_path)
+        self.nr_files = len(paths)
 
-nr_of_batches = nr_files // batch_size
+        mask = np.arange(self.nr_files)
 
-paths_batches = np.array_split(paths, nr_of_batches)
-labels_batches = np.array_split(labels, nr_of_batches)
+        np.random.shuffle(mask)
 
-preprocessor = Preprocessor(10)
-augment = AugmentTransform(20)
+        self.paths = np.array(paths)[mask]
+        self.labels = np.array(labels)[mask]
 
-for path_batch, label_batch in zip(paths_batches, labels_batches):
-    spectrograms_batch = preprocessor.load_and_preprocess(path_batch)
-    spectrograms_batch = augment.augment_transform(spectrograms_batch)
-    # for spec in spectrograms_batch:
-    #    print(spec.shape)
-    #    plt.imshow(spec)
-    #    plt.show()
+
+
+    def start_queue_filling_process(self):
+        self.queue = mp.Queue(maxsize=self.queue_size)
+        self.process = mp.Process(target=self.__fill_queue)
+        self.process.start()
+
     
+    def __fill_queue(self):
+        while True:
+            while self.queue.full():
+                time.sleep(1)
+            
+            self.queue.put(self.__get_random_training_sample())
+
+
+    def __get_random_training_sample(self):
+        r = random.randint(0, self.nr_files - 1)
+        path = self.paths[r]
+        label = self.labels[r]
+        sample = self.preprocessor.load_sample(path)
+        spec = self.preprocessor.preprocess(sample)
+        spec = self.augmenter.augment_transform(spec)
+        return (spec[0], label)
+
+    
+    def train(self):
+        self.load_data()
+        self.start_queue_filling_process()
+
+        nr_batches = self.nr_files // self.batch_size
+        
+        for epoch in range(self.nr_epoch):
+            for batch_i in range(nr_batches):
+                spec_batch = []
+                label_batch = []
+                for sample in range(self.batch_size):
+                    (spec, label) = self.queue.get()
+                    spec_batch.append(spec)
+                    label_batch.append(label)
+                
+
+
+if __name__ == "__main__":
+    label_path = sys.argv[1]
+    bird = Bird(label_path)
+    bird.train()
+            
