@@ -22,12 +22,14 @@ class Preprocessor(object):
 
     def __load_wav(self, wav_path):
         print("Loading wav file: ", wav_path)
-        y, sr = librosa.load(wav_path)
+        # y, sr = librosa.load(wav_path)
+        y = np.load(wav_path)
+        sr = 22050
     
         samples_per_slice = sr * self.duration
-        random_offset = random.randint(0, y.shape[0] - samples_per_slice)
+        # random_offset = random.randint(0, y.shape[0] - samples_per_slice)
 
-        y_slice = y[random_offset : (random_offset + samples_per_slice)]
+        y_slice = y[0:samples_per_slice]  # y[random_offset : (random_offset + samples_per_slice)]
         
         spectrograms = [spectrogram(y_slice)]  # keep list formulation, if we want to use different preprocessing scheme
 

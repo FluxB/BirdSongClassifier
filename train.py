@@ -42,8 +42,8 @@ augment = AugmentTransform(20)
 for path_batch, label_batch in zip(paths_batches, labels_batches):
     spectrograms_batch = preprocessor.load_and_preprocess(path_batch)
     spectrograms_batch = augment.augment_transform(spectrograms_batch)
-    for spec in spectrograms_batch:
-        print(spec.shape)
-        plt.imshow(spec)
-        plt.show()
+    # for spec in spectrograms_batch:
+    #    print(spec.shape)
+    #    plt.imshow(spec)
+    #    plt.show()
     
