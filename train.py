@@ -82,7 +82,8 @@ class Bird(object):
                     (spec, label) = self.queue.get()
                     spec_batch.append(spec)
                     label_batch.append(label)
-                
+
+                #START TRAINING HERE
 
 
 if __name__ == "__main__":
