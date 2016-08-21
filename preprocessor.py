@@ -44,8 +44,8 @@ class Preprocessor(object):
         preprocessed_spectrograms = []
         for spec in spectrograms:
             preprocessed_spec = spec
-            preprocessed_spec = self.bg_sub(preprocessed_spec)
-            preprocessed_spec = np.log(spec**2)
+            preprocessed_spec = self.bg_subtraction(preprocessed_spec)
+            # preprocessed_spec = np.log(spec**2)
             preprocessed_spec /= np.max(preprocessed_spec)
             preprocessed_spectrograms.extend([preprocessed_spec])
 
