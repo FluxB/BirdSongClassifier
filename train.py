@@ -7,9 +7,10 @@ import multiprocessing as mp
 import time
 import random
 
-
+# main class of programm, starts and organizes the training
 class Bird(object):
 
+    # label_path: path to label file which holds the path of all samples and their class id
     def __init__(self, label_path):
         self.label_path = sys.argv[1]
         self.batch_size = 32
@@ -19,7 +20,9 @@ class Bird(object):
         self.augmenter = AugmentTransform(20, 10)
         self.inverse_labels = {}
 
-
+    # loads all sample paths and their id into memory. 
+    # builds up an inverse lookup structure to augment
+    # samples with the same class. 
     def load_labels(self, label_path):
         f = open(label_path, "r")
         paths = []
@@ -38,6 +41,7 @@ class Bird(object):
         return (paths, labels)
 
 
+    # loads and randomizes data
     def load_data(self):
         (paths, labels) = self.load_labels(self.label_path)
         self.nr_files = len(paths)
@@ -50,7 +54,7 @@ class Bird(object):
         self.labels = np.array(labels)[mask]
 
 
-
+    # kicksoff second thread that asynchronously fills data into memory
     def start_queue_filling_process(self):
         self.queue = mp.Queue(maxsize=self.queue_size)
         self.process = mp.Process(target=self.__fill_queue)
@@ -65,6 +69,8 @@ class Bird(object):
             self.queue.put(self.__get_random_training_sample())
 
 
+    # loads a single new training sample from disc. 
+    # preprocesses and augments the training sample.
     def __get_random_training_sample(self):
         r = random.randint(0, self.nr_files - 1)
         path = self.paths[r]
@@ -75,6 +81,7 @@ class Bird(object):
         return (spec[0], label)
 
     
+    # start training process
     def train(self):
         self.load_data()
         self.start_queue_filling_process()
