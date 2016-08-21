@@ -89,7 +89,8 @@ class Bird(object):
                     (spec, label) = self.queue.get()
                     spec_batch.append(spec)
                     label_batch.append(label)
-
+                    plt.imshow(spec)
+                    plt.show()
                 #START TRAINING HERE
 
 
