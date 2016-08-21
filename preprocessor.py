@@ -27,15 +27,10 @@ class Preprocessor(object):
         return spectrogram(y)
     
     def load_sample(self, sample_path):
-        print("Loading wav file: ", sample_path)
-        y = np.load(sample_path)
-        sr = 22050
+        print("Loading spec: ", sample_path)
+        spec = np.load(sample_path)
     
-        samples_per_slice = sr * self.duration
-
-        y_slice = y[0:samples_per_slice]
-        
-        spectrograms = [spectrogram(y_slice)]  # keep list formulation, if we want to use different preprocessing scheme
+        spectrograms = [spec]  # keep list formulation, if we want to use different preprocessing scheme
 
         return spectrograms
 
