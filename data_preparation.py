@@ -9,13 +9,17 @@ import sys
 import librosa
 import numpy as np
 import pickle
+from spectrogram import spectrogram
+import scipy.ndimage.morphology as morph
+import matplotlib.pyplot as plt
 
 
 class DataPreparator(object):
 
-    def __init__(self, data_path, out_path):
+    def __init__(self, data_path, out_path, chunk_duration):
         self.data_path = data_path
         self.out_path = out_path
+        self.chunk_duration = chunk_duration
 
 
     def prepareTrainingData(self):   
@@ -42,18 +46,79 @@ class DataPreparator(object):
                     continue
                 print("Preparing file: ", wav)
                 y, sr = librosa.load(self.data_path + folder + "/" + wav)
+                spec = spectrogram(y)
+                spec = self.bg_subtraction(spec)
+                chunks = self.make_chunks(spec)
                 name, ftype = wav.split(".")
-                out_fname = self.out_path + name + ".npy"
-                np.save(out_fname, y)
-                f_label.write(out_fname + " " + str(label_dict[folder]) + "\n")
-                f_meta.write(out_fname + "," + str(sr) + "," + str(y.shape[0]) + "\n")
+                for i, chunk in enumerate(chunks):
+                    out_fname = self.out_path + name + "_" + str(i) + ".npy"
+                    np.save(out_fname, y)
+                    f_label.write(out_fname + " " + str(label_dict[folder]) + "\n")
+                    f_meta.write(out_fname + "," + str(sr) + "," + str(y.shape[0]) + "\n")
 
         pickle.dump(label_dict, open("label_dict.pickle", "wb"))
+
+
+    def bg_subtraction(self,s):
+
+        mask,vector = self.create_mask(s)
+
+        #signal
+        s_signal = s
+        s_signal[np.logical_not(mask)] = 0
+        s_signal = s_signal[...,vector]
+        return s_signal
+        #background
+
+        s_bg = s[...,np.logical_not(vector)]
+
+    
+    def create_mask(self,s): # Creates mask to kill background noise and quite times
+        nb_f, nb_t = len(s[:,0]), len(s[0,:])
+
+        # normalize naively
+        sn=np.true_divide(s, np.max(s))
+
+
+        # to Set zero values smaller than 3 times fixed-t-median or smaller 3 times fixed-f-median
+        m_f = np.tile(np.median(sn,axis=0),(nb_f,1))
+        m_t = np.transpose(np.tile(np.transpose(np.median(sn,axis=1)),(nb_t,1)))
+
+
+
+        mask_inv = np.logical_or((sn < 3 * m_f),(sn < 3 * m_t))
+        mask = np.logical_not(mask_inv)
+
+        #morphological trafos: dilation and erosion
+        mask = morph.binary_erosion(mask,structure=np.ones((4,4)),iterations=1)
+        mask = morph.binary_dilation(mask,structure=np.ones((4,4)),iterations=1)
+
+        #make continous twittering by use of killig vector :)
+        vector = np.sum(mask,axis=0)>0
+        vector = morph.binary_dilation(vector,structure=np.ones((1)),iterations=1)
+
+        return mask, vector
+
+
+    def make_chunks(self, spec):
+        nr_chunks = spec.shape[1] // self.chunk_duration
+        split_points = [i * self.chunk_duration for i in range(1, nr_chunks + 1)]
+        spec_split = np.array_split(spec, split_points, axis=1)
+        chunks = []
+        for chunk in spec_split:
+            (chunk_frequ, chunk_length) = chunk.shape
+            if chunk_length  < self.chunk_duration:
+                padded_chunk = np.zeros((chunk_frequ, self.chunk_duration))
+                padded_chunk[:, :chunk_length] = chunk
+                chunk = padded_chunk
+            chunks.append(chunk)
+
+        return chunks
 
 
 if __name__ == "__main__":
     data_path = sys.argv[1]
     out_path = sys.argv[2]
 
-    preparator = DataPreparator(data_path, out_path)
+    preparator = DataPreparator(data_path, out_path, 512)
     preparator.prepareTrainingData()
