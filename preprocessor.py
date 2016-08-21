@@ -1,3 +1,4 @@
+from __future__ import division
 import librosa
 from spectrogram import spectrogram
 import random
@@ -49,34 +50,41 @@ class Preprocessor(object):
 
         return preprocessed_spectrograms
 
-
     def bg_subtraction(self,s):
+
         mask,vector = self.create_mask(s)
-        s[np.logical_not(mask)]=0
+
         #signal
-        s_signal = s[...,vector]
-        #background
-        s_bg = s[...,np.logical_not(vector)]
+        s_signal = s
+        s_signal[np.logical_not(mask)] = 0
+        s_signal = s_signal[...,vector]
         return s_signal
+        #background
     
+        s_bg = s[...,np.logical_not(vector)]
+        
     def create_mask(self,s): # Creates mask to kill background noise and quite times
         nb_f, nb_t = len(s[:,0]), len(s[0,:])
-
-        # normalize naively
-        s /= np.max(s)
         
-        # set to zero values smaller than 3 times fixed-t-median or smaller 3 times fixed-f-median
-        m_f = np.tile(np.median(s,axis=0),(nb_f,1))
-        m_t = np.transpose(np.tile(np.transpose(np.median(s,axis=1)),(nb_t,1)))
-        mask_inv = np.logical_or((s < 3 * m_f),(s < 3 * m_t))
-        mask = np.logical_not(mask_inv) 
+        # normalize naively
+        sn=np.true_divide(s, np.max(s))
+        
+        
+        # to Set zero values smaller than 3 times fixed-t-median or smaller 3 times fixed-f-median
+        m_f = np.tile(np.median(sn,axis=0),(nb_f,1))
+        m_t = np.transpose(np.tile(np.transpose(np.median(sn,axis=1)),(nb_t,1)))
 
+        
+       
+        mask_inv = np.logical_or((sn < 3 * m_f),(sn < 3 * m_t))
+        mask = np.logical_not(mask_inv)
+        
         #morphological trafos: dilation and erosion
         mask = morph.binary_erosion(mask,structure=np.ones((4,4)),iterations=1)
         mask = morph.binary_dilation(mask,structure=np.ones((4,4)),iterations=1)
 
         #make continous twittering by use of killig vector :)
-        vector = np.argmax(mask,axis=0)
+        vector = np.sum(mask,axis=0)>0
         vector = morph.binary_dilation(vector,structure=np.ones((1)),iterations=1)
-
+        
         return mask, vector
