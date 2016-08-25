@@ -20,11 +20,11 @@ class Test_bg_subtraction(unittest.TestCase):
         generator = DataPreparator("", "", 512)
         samples1=len(s[0,:])
         
-        snew = generator.bg_subtraction(s)
+        snew,sbg = generator.bg_subtraction(s)
         samples2=len(snew[0,:])
 
         self.assertGreater(samples1, samples2)
-        #plot_spect([snew,p.load_npy('./test.npy')])
+        plot_spect([snew,p.load_npy('./test.npy'),sbg])
 
 
     
