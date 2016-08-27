@@ -24,7 +24,7 @@ class DataPreparator(object):
 
     def prepareTrainingData(self):   
         f_label = open("labels.txt", "w")
-        f_label_bg = open("labels.txt", "w")
+        f_label_bg = open("labels_bg.txt", "w")
         f_meta = open("meta.txt", "w")
 
         if not os.path.isdir(self.out_path):
@@ -69,7 +69,7 @@ class DataPreparator(object):
                     f_meta.write(out_fname + "," + str(sr) + "," + str(spec.shape[0]) + "\n")
 
                 for i, chunk in enumerate(chunks_bg):
-                    out_fname = self.out_path + "/bg/" + name + "_bg_" + str(i) + ".npy"
+                    out_fname = self.out_path + name + "_bg_" + str(i) + ".npy"
                     f_label_bg.write(out_fname + " " + str(label_dict[folder]) + "\n")
                     np.save(out_fname, chunk)
                     
@@ -84,11 +84,12 @@ class DataPreparator(object):
         
         #signal projection
         #s[np.logical_not(mask)] = 0
-        s= s[...,vector]
+        s_signal = s[...,vector]
 
         #background projection
         s_bg = s[...,np.logical_not(vector)]
-        return s,s_bg
+
+        return s_signal,s_bg
         
     
     def create_mask(self,s): # Creates mask to kill background noise and quiet times
