@@ -24,6 +24,7 @@ class DataPreparator(object):
 
     def prepareTrainingData(self):   
         f_label = open("labels.txt", "w")
+        f_label_bg = open("labels.txt", "w")
         f_meta = open("meta.txt", "w")
 
         if not os.path.isdir(self.out_path):
@@ -54,6 +55,9 @@ class DataPreparator(object):
                 spec=np.true_divide(spec, np.max(spec))
                 
                 spec,bg = self.bg_subtraction(spec)
+
+                bg=np.true_divide(bg, np.max(spec))
+
                 chunks = self.make_chunks(spec)
                 chunks_bg = self.make_chunks(bg)
                 
@@ -66,6 +70,7 @@ class DataPreparator(object):
 
                 for i, chunk in enumerate(chunks_bg):
                     out_fname = self.out_path + "/bg/" + name + "_bg_" + str(i) + ".npy"
+                    f_label_bg.write(out_fname + " " + str(label_dict[folder]) + "\n")
                     np.save(out_fname, chunk)
                     
         pickle.dump(label_dict, open("label_dict.pickle", "wb"))
@@ -75,15 +80,14 @@ class DataPreparator(object):
 
         mask,vector = self.create_mask(s)
 
-        s_bg = np.array(s,copy=True)
-       
+        #s_bg = np.array(s,copy=True)
         
         #signal projection
-        s[np.logical_not(mask)] = 0
+        #s[np.logical_not(mask)] = 0
         s= s[...,vector]
 
         #background projection
-        s_bg = s_bg[...,np.logical_not(vector)]
+        s_bg = s[...,np.logical_not(vector)]
         return s,s_bg
         
     
