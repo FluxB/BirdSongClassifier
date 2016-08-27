@@ -54,6 +54,7 @@ class AugmentTransform(object):
 
     def time_augmentation(self, spec):
         random_time_shift = random.randint(-self.time_shift, self.time_shift)
+
         augmented_spec = np.roll(spec, random_time_shift, axis=1)
 
         return augmented_spec

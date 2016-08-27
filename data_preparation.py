@@ -66,7 +66,7 @@ class DataPreparator(object):
                     out_fname = self.out_path + "/" + name + "_" + str(i) + ".npy"
                     np.save(out_fname, chunk)
                     f_label.write(out_fname + " " + str(label_dict[folder]) + "\n")
-                    f_meta.write(out_fname + "," + str(sr) + "," + str(spec.shape[0]) + "," + str(spec.shape[1]) + "\n")
+                    f_meta.write(out_fname + " " + str(sr) + " " + str(spec.shape[0]) + " " + str(spec.shape[1]) + "\n")
 
                 for i, chunk in enumerate(chunks_bg):
                     out_fname = self.out_path + name + "_bg_" + str(i) + ".npy"
