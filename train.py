@@ -19,15 +19,20 @@ class Bird(object):
         self.preprocessor = Preprocessor(10)
         self.augmenter = AugmentTransform(20, 10)
         self.inverse_labels = {}
-
+        self.inverse_labels_bg = {}
+        
     # loads all sample paths and their id into memory. 
     # builds up an inverse lookup structure to augment
     # samples with the same class. 
-    def load_labels(self, label_path):
+    def load_labels(self, label_path, label_bg_path):
         f = open(label_path, "r")
+        f_bg = open(label_bg_path, "r")
         paths = []
         labels = []
+
         self.inverse_labels = {}
+        self.inverse_labels_bg = {}
+        
         for line in f:
             line = line.strip()
             (path, label) = line.split(" ")
@@ -35,9 +40,15 @@ class Bird(object):
             labels.append(label)
             self.inverse_labels.setdefault(label, []).append(path)
 
-        self.augmenter.configure_same_class_augmentation(self.inverse_labels,
-                                                         self.preprocessor,
-                                                         samples_to_add=[1, 2])
+        for line in f_bg:
+            line = line.strip()
+            (path, label) = line.split(" ")
+ 
+            self.inverse_labels_bg.setdefault(label, []).append(path)
+
+            
+        self.augmenter.configure_same_class_augmentation(self.inverse_labels,self.inverse_labels_bg,self.preprocessor,samples_to_add=[1, 2])
+        
         return (paths, labels)
 
 
