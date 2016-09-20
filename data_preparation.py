@@ -56,10 +56,7 @@ class DataPreparator(object):
                 
                 spec,bg = self.bg_subtraction(spec)
 
-                bg=np.true_divide(bg, np.max(spec))
-
                 chunks = self.make_chunks(spec)
-                chunks_bg = self.make_chunks(bg)
                 
                 name, ftype = wav.split(".")
                 for i, chunk in enumerate(chunks):
@@ -67,6 +64,11 @@ class DataPreparator(object):
                     np.save(out_fname, chunk)
                     f_label.write(out_fname + " " + str(label_dict[folder]) + "\n")
                     f_meta.write(out_fname + " " + str(sr) + " " + str(spec.shape[0]) + " " + str(spec.shape[1]) + "\n")
+                
+                if bg.shape[1] == 0:
+                    continue
+                bg=np.true_divide(bg, np.max(spec))
+                chunks_bg = self.make_chunks(bg)
 
                 for i, chunk in enumerate(chunks_bg):
                     out_fname = self.out_path + name + "_bg_" + str(i) + ".npy"
