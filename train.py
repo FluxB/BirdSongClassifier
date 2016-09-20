@@ -11,6 +11,7 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization
 from keras.utils import np_utils
 from keras.optimizers import SGD
+import models
 
 
 # main class of programm, starts and organizes the training
@@ -114,57 +115,11 @@ class Bird(object):
         spec = self.augmenter.augment_transform(spec, label)
         return (spec[0], label)
 
-    def __model1(self): # Model from paper, adaption due to different FT parameters needed
-        nb_filters=64
-        kernel_size=5
-        model = Sequential()
-
-        model.add(Dropout(0.2,input_shape=(1,self.nb_f_steps,self.nb_t_steps)))
-        model.add(BatchNormalization())
-        model.add(Convolution2D(nb_filters,kernel_size,kernel_size,subsample=(1,2),border_mode='valid'))
-        model.add(Activation('relu'))
-        
-        model.add(MaxPooling2D(pool_size=(2,2)))
-        model.add(BatchNormalization())
-        model.add(Convolution2D(nb_filters, kernel_size, kernel_size,subsample=(1,1)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2,2)))
-
-        model.add(BatchNormalization())
-        model.add(Convolution2D(2*nb_filters, kernel_size, kernel_size))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2,2)))
-
-        model.add(BatchNormalization())
-        model.add(Convolution2D(4*nb_filters, kernel_size, kernel_size))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2,2)))
-
-        model.add(BatchNormalization())
-        model.add(Convolution2D(4*nb_filters, 3, 3))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2,2)))
-
-        model.add(Dropout(0.4))
-        model.add(Flatten())
-
-        model.add(BatchNormalization())
-        model.add(Dense(1024))
-        model.add(Activation('relu'))
-
-        model.add(Dropout(0.4))
-        model.add(Dense(self.nb_species))
-        model.add(Activation('softmax'))
-
-        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-        model.compile(loss='categorical_crossentropy',optimizer=sgd)
-
-        return model
     
     # start training process
     def train(self):
         self.load_data()
-        model=self.__model1()
+        model=models.model_paper(self.nb_species)
         self.start_queue_filling_process()
         nr_batches = self.nr_files // self.batch_size
         
@@ -179,7 +134,7 @@ class Bird(object):
                     #plt.imshow(spec)
                     #plt.show()e
                 
-                #model.fit(spec_batch,label_batch, verbose=1)
+                #model.fit(spec_batch,label_batch, batch_size=self.batch_size, verbose=1, nb_epoch=1)
 
         #model.save(self.output_path)
 
