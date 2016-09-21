@@ -10,8 +10,10 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization
 from keras.utils import np_utils
+from keras.utils import generic_utils
 from keras.optimizers import SGD
 import models
+from keras.callbacks import ProgbarLogger
 
 
 # main class of programm, starts and organizes the training
@@ -119,14 +121,17 @@ class Bird(object):
     # start training process
     def train(self):
         self.load_data()
-        model=models.model_paper(self.nb_species, (self.nb_f_steps, self.nb_t_steps))
+        self.model = models.model_paper(self.nb_species, (self.nb_f_steps, self.nb_t_steps))
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-        model.compile(loss='categorical_crossentropy',optimizer=sgd)
+        self.model.compile(loss='sparse_categorical_crossentropy',optimizer=sgd)
 
         self.start_queue_filling_process()
         nr_batches = self.nr_files // self.batch_size
         
-        model.summary()
+        self.model.summary()
+
+        # progbar = generic_utils.Progbar(self.nr_files, width=20)
+        progbar = ProgbarLogger()
 
         for epoch in range(self.nr_epoch):
             for batch_i in range(nr_batches):
@@ -138,8 +143,14 @@ class Bird(object):
                     label_batch.append(label)
                     #plt.imshow(spec)
                     #plt.show()e
-                
-                #model.fit(spec_batch,label_batch, batch_size=self.batch_size, verbose=1, nb_epoch=1)
+
+                label_batch = np.array(label_batch)
+                                
+                history = self.model.fit(spec_batch,label_batch, batch_size=self.batch_size, verbose=0, nb_epoch=1, callbacks=[progbar])
+                # loss = fit_result.history['loss'][0]
+                # acc = fit_result.history['acc'][0]
+                # progbar.add(len(self.batch_size), values=[("loss", loss),
+                #                                           ("acc", acc)])
 
         #model.save(self.output_path)
 
