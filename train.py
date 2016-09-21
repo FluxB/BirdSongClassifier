@@ -127,7 +127,6 @@ class Bird(object):
         nr_batches = self.nr_files // self.batch_size
         
         model.summary()
-        raise Exception
 
         for epoch in range(self.nr_epoch):
             for batch_i in range(nr_batches):
