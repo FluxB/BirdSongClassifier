@@ -119,10 +119,16 @@ class Bird(object):
     # start training process
     def train(self):
         self.load_data()
-        model=models.model_paper(self.nb_species)
+        model=models.model_paper(self.nb_species, (self.nb_f_steps, self.nb_t_steps))
+        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+        model.compile(loss='categorical_crossentropy',optimizer=sgd)
+
         self.start_queue_filling_process()
         nr_batches = self.nr_files // self.batch_size
         
+        model.summary()
+        raise Exception
+
         for epoch in range(self.nr_epoch):
             for batch_i in range(nr_batches):
                 spec_batch = []
