@@ -65,7 +65,10 @@ class DataPreparator(object):
                     f_label.write(out_fname + " " + str(label_dict[folder]) + "\n")
                     f_meta.write(out_fname + " " + str(sr) + " " + str(spec.shape[0]) + " " + str(spec.shape[1]) + "\n")
                 
-                if bg.shape[1] == 0:
+                print(bg.shape)
+                print(spec.shape)
+                print(np.max(spec))
+                if bg.shape[1] == 0 or spec.shape[1] == 0:
                     continue
                 bg=np.true_divide(bg, np.max(spec))
                 chunks_bg = self.make_chunks(bg)
