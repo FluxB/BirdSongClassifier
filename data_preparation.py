@@ -63,11 +63,8 @@ class DataPreparator(object):
                     out_fname = self.out_path + "/" + name + "_" + str(i) + ".npy"
                     np.save(out_fname, chunk)
                     f_label.write(out_fname + " " + str(label_dict[folder]) + "\n")
-                    f_meta.write(out_fname + " " + str(sr) + " " + str(spec.shape[0]) + " " + str(spec.shape[1]) + "\n")
+                    f_meta.write(out_fname + " " + str(sr) + " " + str(chunk.shape[0]) + " " + str(chunk.shape[1]) + "\n")
                 
-                print(bg.shape)
-                print(spec.shape)
-                print(np.max(spec))
                 if bg.shape[1] == 0 or spec.shape[1] == 0:
                     continue
                 bg=np.true_divide(bg, np.max(spec))
