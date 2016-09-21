@@ -4,7 +4,7 @@ from keras.layers import Convolution2D, MaxPooling2D, BatchNormalization
 from keras.utils import np_utils
 
 
-def model_paper(self, nb_species): # Model from paper, adaption due to different FT parameters needed
+def model_paper(nb_species): # Model from paper, adaption due to different FT parameters needed
     nb_filters=64
     kernel_size=5
     model = Sequential()
