@@ -12,27 +12,27 @@ def model_paper(nb_species, input_size): # Model from paper, adaption due to dif
 
     model.add(Dropout(0.2,input_shape=(1, nb_f_steps, nb_t_steps)))
     model.add(BatchNormalization())
-    model.add(Convolution2D(nb_filters,kernel_size,kernel_size,subsample=(1,2),border_mode='valid'))
+    model.add(Convolution2D(nb_filters,kernel_size,kernel_size,subsample=(1,2),border_mode='same'))
     model.add(Activation('relu'))
         
     model.add(MaxPooling2D(pool_size=(2,2)))
     model.add(BatchNormalization())
-    model.add(Convolution2D(nb_filters, kernel_size, kernel_size,subsample=(1,1)))
+    model.add(Convolution2D(nb_filters, kernel_size, kernel_size,subsample=(1,1), border_mode='same'))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2,2)))
 
     model.add(BatchNormalization())
-    model.add(Convolution2D(2*nb_filters, kernel_size, kernel_size))
+    model.add(Convolution2D(2*nb_filters, kernel_size, kernel_size, border_mode='same'))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2,2)))
 
     model.add(BatchNormalization())
-    model.add(Convolution2D(4*nb_filters, kernel_size, kernel_size))
+    model.add(Convolution2D(4*nb_filters, kernel_size, kernel_size, border_mode='same'))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2,2)))
 
     model.add(BatchNormalization())
-    model.add(Convolution2D(4*nb_filters, 3, 3))
+    model.add(Convolution2D(4*nb_filters, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2,2)))
 
