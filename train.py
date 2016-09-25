@@ -91,20 +91,17 @@ class Bird(object):
         self.labels = np.array(labels)[mask]
 
 
-    # kicksoff second thread that asynchronously fills data into memory
-    def start_queue_filling_process(self):
-        self.queue = mp.Queue(maxsize=self.queue_size)
-        self.process = mp.Process(target=self.__fill_queue)
-        self.process.start()
-
-    
-    def __fill_queue(self):
+    def train_data_generator(self):
         while True:
-            while self.queue.full():
-                time.sleep(1)
+            print("load new batch")
+            specs = []
+            labels = []
+            for i in range(self.batch_size):
+                (spec, label) = self.get_random_training_sample()
+                specs.append([spec])
+                labels.append([label])
             
-            self.queue.put(self.get_random_training_sample())
-
+            yield (np.array(specs), np.array(labels))
 
     # loads a single new training sample from disc. 
     # preprocesses and augments the training sample.
@@ -124,35 +121,14 @@ class Bird(object):
         self.model = models.model_paper(self.nb_species, (self.nb_f_steps, self.nb_t_steps))
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
         self.model.compile(loss='sparse_categorical_crossentropy',optimizer=sgd)
-
-        self.start_queue_filling_process()
-        nr_batches = self.nr_files // self.batch_size
         
         self.model.summary()
 
-        # progbar = generic_utils.Progbar(self.nr_files, width=20)
         progbar = ProgbarLogger()
 
-        for epoch in range(self.nr_epoch):
-            for batch_i in range(nr_batches):
-                spec_batch = []
-                label_batch = []
-                for sample in range(self.batch_size):
-                    (spec, label) = self.queue.get()
-                    spec_batch.append([spec])
-                    label_batch.append(label)
-                    #plt.imshow(spec)
-                    #plt.show()e
+        history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files, 
+                                           nb_epoch=10, verbose=1, callbacks=[progbar])
 
-                label_batch = np.array(label_batch)
-                                
-                history = self.model.fit(spec_batch,label_batch, batch_size=self.batch_size, verbose=0, nb_epoch=1, callbacks=[progbar])
-                # loss = fit_result.history['loss'][0]
-                # acc = fit_result.history['acc'][0]
-                # progbar.add(len(self.batch_size), values=[("loss", loss),
-                #                                           ("acc", acc)])
-
-        #model.save(self.output_path)
 
 
 
