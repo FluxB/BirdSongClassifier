@@ -34,6 +34,8 @@ class Bird(object):
         self.augmenter = AugmentTransform(10, 10)
         self.inverse_labels = {}
         self.inverse_labels_bg = {}
+
+        self.train_val_ratio = 0.1
         
     # loads all sample paths and their id into memory. 
     # builds up an inverse lookup structure to augment
@@ -81,14 +83,24 @@ class Bird(object):
         (paths, labels) = self.load_labels(self.label_path,self.label_bg_path)
         self.load_meta_data(self.meta_path)
         
-        self.nr_files = len(paths)
+        nr_files = len(paths)
 
-        mask = np.arange(self.nr_files)
+        mask = np.arange(nr_files)
 
         np.random.shuffle(mask)
 
-        self.paths = np.array(paths)[mask]
-        self.labels = np.array(labels)[mask]
+        train_size = int(nr_files * (1 - self.train_val_ratio))
+
+        paths = np.array(paths)[mask]
+        labels = np.array(labels)[mask]
+
+        self.paths = paths[:train_size]
+        self.labels = labels[:train_size]
+        self.nr_files = train_size
+
+        self.val_paths = paths[train_size:]
+        self.val_labels = paths[train_size:]
+        self.nr_val_files = nr_files - train_size
 
 
     def train_data_generator(self):
@@ -101,6 +113,14 @@ class Bird(object):
                 labels.append(np.array([label]))
 
             yield (np.array(specs), np.array(labels))
+
+
+    def val_data_generator(self):
+        for val_path, val_label in zip(self.val_paths, self.val_labels):
+            sample = self.preprocessor.load_sample(val_path)
+            spec = self.preprocessor.preprocess(sample)
+            # spec = self.augmenter.augment_transform(spec, val_label)
+            yield (spec[0], label)
 
     # loads a single new training sample from disc. 
     # preprocesses and augments the training sample.
@@ -126,7 +146,8 @@ class Bird(object):
         progbar = ProgbarLogger()
 
         history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files,
-                                           nb_epoch=1, verbose=1, max_q_size=self.batch_size)
+                                           nb_epoch=1, verbose=1, max_q_size=self.batch_size,
+                                           validation_data=self.val_data_generator(), nb_val_samples=self.nr_val_files)
 
 
 
