@@ -61,7 +61,7 @@ class DataPreparator(object):
                 name, ftype = wav.split(".")
                 for i, chunk in enumerate(chunks):
                     out_fname = self.out_path + "/" + name + "_" + str(i) + ".npy"
-                    np.save(out_fname, chunk)
+                    np.savetxt(out_fname, chunk)
                     f_label.write(out_fname + " " + str(label_dict[folder]) + "\n")
                     f_meta.write(out_fname + " " + str(sr) + " " + str(chunk.shape[0]) + " " + str(chunk.shape[1]) + "\n")
                 
@@ -73,7 +73,7 @@ class DataPreparator(object):
                 for i, chunk in enumerate(chunks_bg):
                     out_fname = self.out_path + name + "_bg_" + str(i) + ".npy"
                     f_label_bg.write(out_fname + " " + str(label_dict[folder]) + "\n")
-                    np.save(out_fname, chunk)
+                    np.savetxt(out_fname, chunk)
                     
         pickle.dump(label_dict, open("label_dict.pickle", "wb"))
 

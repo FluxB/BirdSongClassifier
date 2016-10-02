@@ -24,12 +24,12 @@ class Preprocessor(object):
 
     def load_npy(self,np_path):
         #print("Loading npy file: ", np_path)
-        y = np.load(np_path)
+        y = np.loadtxt(np_path)
         return spectrogram(y)
     
     def load_sample(self, sample_path):
         #print("Loading spec: ", sample_path)
-        spec = np.load(sample_path)
+        spec = np.loadtxt(sample_path)
     
         spectrograms = [spec]  # keep list formulation, if we want to use different preprocessing scheme
 
