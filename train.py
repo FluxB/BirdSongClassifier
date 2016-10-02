@@ -93,14 +93,13 @@ class Bird(object):
 
     def train_data_generator(self):
         while True:
-            print("load new batch")
             specs = []
             labels = []
             for i in range(self.batch_size):
                 (spec, label) = self.get_random_training_sample()
-                specs.append([spec])
-                labels.append([label])
-            
+                specs.append(np.array([spec]))
+                labels.append(np.array([label]))
+
             yield (np.array(specs), np.array(labels))
 
     # loads a single new training sample from disc. 
@@ -120,14 +119,14 @@ class Bird(object):
         self.load_data()
         self.model = models.model_paper(self.nb_species, (self.nb_f_steps, self.nb_t_steps))
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-        self.model.compile(loss='sparse_categorical_crossentropy',optimizer=sgd)
+        self.model.compile(loss='sparse_categorical_crossentropy',optimizer=sgd,metrics=['accuracy'])
         
         self.model.summary()
 
         progbar = ProgbarLogger()
 
-        history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files, 
-                                           nb_epoch=10, verbose=1, callbacks=[progbar])
+        history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files,
+                                           nb_epoch=1, verbose=1, max_q_size=self.batch_size)
 
 
 
