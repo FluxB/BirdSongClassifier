@@ -66,6 +66,8 @@ class DataPreparator(object):
         label_dict = {}
         file_names = os.listdir(self.data_path)
 
+        data_path_trunk = self.data_path[:-3]
+
         for file_name in file_names:
             if file_name[0] == ".":
                 continue
@@ -76,7 +78,7 @@ class DataPreparator(object):
             metadata = ""
             for child in root:
                 metadata += child.text + ","
-            self.__process_wav(wav, label_dict, class_name, f_label, f_label_bg, f_meta, metadata)
+            self.__process_wav(data_path_trunk + wav, label_dict, class_name, f_label, f_label_bg, f_meta, metadata)
 
     def __process_wav(self, wav, label_dict, class_name, f_label, f_label_bg, f_meta, additional_meta=""):
         print("Preparing file: ", wav)
@@ -163,4 +165,4 @@ if __name__ == "__main__":
     out_path = sys.argv[2]
 
     preparator = DataPreparator(data_path, out_path, 512)
-    preparator.prepareTrainingData()
+    preparator.prepareCLEFTrainingData()
