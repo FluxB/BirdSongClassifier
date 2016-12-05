@@ -9,6 +9,7 @@ import sys
 import librosa
 import numpy as np
 import pickle
+import hickle
 from spectrogram import spectrogram
 import scipy.ndimage.morphology as morph
 import matplotlib.pyplot as plt
@@ -91,8 +92,8 @@ class DataPreparator(object):
 
         name, ftype = wav.split(".")
         for i, chunk in enumerate(chunks):
-            out_fname = self.out_path + "/" + name + "_" + str(i) + ".npy"
-            np.savetxt(out_fname, chunk)
+            out_fname = str.format("{}/{}_{}.hkl", self.out_path, name, i)
+            hickle.dump(chunk, open(out_fname, "w"))
             f_label.write(out_fname + " " + str(label_dict[class_name]) + "\n")
             f_meta.write("{} {} {} {} {}\n".format(out_fname, sr, chunk.shape[0], chunk.shape[1], additional_meta))
 
@@ -102,9 +103,9 @@ class DataPreparator(object):
         chunks_bg = self.make_chunks(bg)
 
         for i, chunk in enumerate(chunks_bg):
-            out_fname = self.out_path + name + "_bg_" + str(i) + ".npy"
+            out_fname = str.format("{}/{}_bg_{}.hkl", self.out_path, name, i)
             f_label_bg.write(out_fname + " " + str(label_dict[class_name]) + "\n")
-            np.savetxt(out_fname, chunk)
+            hickle.dump(chunk, open(out_fname, "w"))
 
     def bg_subtraction(self, s):
 
