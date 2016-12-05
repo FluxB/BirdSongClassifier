@@ -84,7 +84,7 @@ class DataPreparator(object):
 
     def __process_wav(self, wav, label_dict, class_name, f_label, f_label_bg, f_meta, additional_meta=""):
         print("Preparing file: ", wav)
-        y, sr = librosa.load(self.data_path + class_name + "/" + wav)
+        y, sr = librosa.load(wav)
         spec = spectrogram(y)
 
         # normalize naively
