@@ -9,7 +9,6 @@ import sys
 import librosa
 import numpy as np
 import pickle
-import hickle
 from spectrogram import spectrogram
 import scipy.ndimage.morphology as morph
 import matplotlib.pyplot as plt
@@ -74,6 +73,7 @@ class DataPreparator(object):
             tree = ET.parse(self.data_path + "/" + file_name)
             root = tree.getroot()
             class_name = root.find("ClassId").text
+            label_dict[class_name] = label_dict.get(class_name, len(label_dict))
             wav = root.find("FileName").text
             metadata = ""
             for child in root:
@@ -95,11 +95,12 @@ class DataPreparator(object):
         chunks = self.make_chunks(spec)
 
         name, ftype = wav.split(".")
+        name = name.split("/")[-1]
         for i, chunk in enumerate(chunks):
-            out_fname = str.format("{}/{}_{}.hkl", self.out_path, name, i)
-            hickle.dump(chunk, open(out_fname, "w"))
+            out_fname = str.format("{}/{}_{}.pkl", self.out_path, name, i)
+            pickle.dump(chunk, open(out_fname, "wb"), protocol=2)
             f_label.write(out_fname + " " + str(label_dict[class_name]) + "\n")
-            f_meta.write("{} {} {} {} {}\n".format(out_fname, sr, chunk.shape[0], chunk.shape[1], additional_meta))
+            f_meta.write("{} {} {} {} {}\n".format(out_fname, sr, chunk.shape[0], chunk.shape[1], additional_meta.encode("utf-8")))
 
         if bg.shape[1] == 0 or spec.shape[1] == 0:
             return
@@ -107,9 +108,9 @@ class DataPreparator(object):
         chunks_bg = self.make_chunks(bg)
 
         for i, chunk in enumerate(chunks_bg):
-            out_fname = str.format("{}/{}_bg_{}.hkl", self.out_path, name, i)
+            out_fname = str.format("{}/bg/{}_bg_{}.pkl", self.out_path, name, i)
             f_label_bg.write(out_fname + " " + str(label_dict[class_name]) + "\n")
-            hickle.dump(chunk, open(out_fname, "w"))
+            pickle.dump(chunk, open(out_fname, "wb"), protocol=2)
 
     def bg_subtraction(self, s):
 
