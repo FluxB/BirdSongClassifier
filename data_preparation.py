@@ -77,7 +77,8 @@ class DataPreparator(object):
             wav = root.find("FileName").text
             metadata = ""
             for child in root:
-                metadata += child.text + ","
+                text = child.text if child.text is not None else ""
+                metadata += text + ","
             self.__process_wav(data_path_trunk + wav, label_dict, class_name, f_label, f_label_bg, f_meta, metadata)
 
     def __process_wav(self, wav, label_dict, class_name, f_label, f_label_bg, f_meta, additional_meta=""):
