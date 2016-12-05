@@ -100,7 +100,7 @@ class DataPreparator(object):
             f_meta.write("{} {} {} {} {}\n".format(out_fname, sr, chunk.shape[0], chunk.shape[1], additional_meta))
 
         if bg.shape[1] == 0 or spec.shape[1] == 0:
-            continue
+            return
         bg = np.true_divide(bg, np.max(spec))
         chunks_bg = self.make_chunks(bg)
 
