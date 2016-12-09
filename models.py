@@ -10,7 +10,7 @@ def model_paper(nb_species, input_size): # Model from paper, adaption due to dif
     (nb_f_steps, nb_t_steps) = input_size
     model = Sequential()
 
-    model.add(AveragePooling2D(pool_size=(2,2), input_shape=(1, nb_f_steps, nb_t_steps)))
+    model.add(AveragePooling2D(pool_size=(2,2), input_shape=(nb_f_steps, nb_t_steps, 1)))
     # model.add(Dropout(0.2,input_shape=(1, nb_f_steps, nb_t_steps)))
     model.add(Dropout(0.2))
     model.add(BatchNormalization())

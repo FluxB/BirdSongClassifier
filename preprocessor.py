@@ -5,6 +5,7 @@ import random
 import numpy as np
 import time
 import scipy.ndimage.morphology as morph
+import pickle
 
 class Preprocessor(object):
 
@@ -24,13 +25,13 @@ class Preprocessor(object):
 
     def load_npy(self,np_path):
         #print("Loading npy file: ", np_path)
-        y = np.loadtxt(np_path)
+        y = pickle.load(open(np_path, "rb"))
         return spectrogram(y)
     
     def load_sample(self, sample_path):
         #print("Loading spec: ", sample_path)
-        spec = np.loadtxt(sample_path)
-    
+        spec = pickle.load(open(sample_path, "rb"))
+
         spectrograms = [spec]  # keep list formulation, if we want to use different preprocessing scheme
 
         return spectrograms

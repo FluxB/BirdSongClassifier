@@ -125,6 +125,8 @@ class DataPreparator(object):
             f_label.write(out_fname + " " + str(label_dict[class_name]) + "\n")
             f_meta.write("{} {} {} {} {}\n".format(out_fname, sr, chunk.shape[0],
                                                    chunk.shape[1], additional_meta.encode("utf-8")))
+            f_label.flush()
+            f_meta.flush()
             self.label_lock.release()
 
         if bg.shape[1] == 0 or spec.shape[1] == 0:
@@ -137,6 +139,7 @@ class DataPreparator(object):
 
             self.bg_lock.acquire()
             f_label_bg.write(out_fname + " " + str(label_dict[class_name]) + "\n")
+            f_label_bg.flush()
             self.bg_lock.release()
 
             pickle.dump(chunk, open(out_fname, "wb"), protocol=2)
@@ -197,4 +200,4 @@ if __name__ == "__main__":
     out_path = sys.argv[2]
 
     preparator = DataPreparator(data_path, out_path, 512)
-    preparator.prepareCLEFTrainingData()
+    preparator.prepareCLEFTrainingData(n_jobs=8)

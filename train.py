@@ -26,7 +26,7 @@ class Bird(object):
         self.meta_path = meta_path
         self.output_path = output_path
         
-        self.batch_size = 16
+        self.batch_size = 64
         self.queue_size = 2048
 
         self.nr_epoch = 1
@@ -73,7 +73,9 @@ class Bird(object):
         with  open(meta_path, "r") as meta:
             first_line=meta.readline()
             first_line = first_line.strip()
-            (path, sr, nb_f_steps, nb_t_steps) = first_line.split(" ")
+            first_line_split = first_line.split(" ")
+            nb_f_steps = first_line_split[2]
+            nb_t_steps = first_line_split[3]
         self.nb_f_steps = int(nb_f_steps)
         self.nb_t_steps = int(nb_t_steps)
         
@@ -109,7 +111,7 @@ class Bird(object):
             labels = []
             for i in range(self.batch_size):
                 (spec, label) = self.get_random_training_sample()
-                specs.append(np.array([spec]))
+                specs.append(np.array([spec]).transpose((1, 2, 0)))
                 labels.append(np.array([label]))
 
             yield (np.array(specs), np.array(labels))
@@ -137,7 +139,8 @@ class Bird(object):
     # start training process
     def train(self):
         self.load_data()
-        self.model = models.model_paper(self.nb_species, (self.nb_f_steps, self.nb_t_steps))
+        self.model = models.model_paper(self.nb_species,
+                                        (self.nb_f_steps, self.nb_t_steps))
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
         self.model.compile(loss='sparse_categorical_crossentropy',optimizer=sgd,metrics=['accuracy'])
         
