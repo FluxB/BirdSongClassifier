@@ -141,7 +141,7 @@ class Bird(object):
         self.load_data()
         self.model = models.model_paper(self.nb_species,
                                         (self.nb_f_steps, self.nb_t_steps))
-        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+        sgd = SGD(lr=0.05, decay=1e-6, momentum=0.9, nesterov=True)
         self.model.compile(loss='sparse_categorical_crossentropy',optimizer=sgd,metrics=['accuracy'])
         
         self.model.summary()
@@ -149,7 +149,7 @@ class Bird(object):
         progbar = ProgbarLogger()
 
         history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files,
-                                           nb_epoch=1, verbose=1, max_q_size=self.batch_size,
+                                           nb_epoch=10, verbose=1, max_q_size=self.batch_size,
                                            validation_data=self.val_data_generator(), nb_val_samples=self.nr_val_files)
 
 

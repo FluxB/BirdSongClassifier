@@ -13,7 +13,7 @@ class AugmentTransform(object):
         self.time_shift = time_shift
         self.inverse_labels = {}
         self.inverse_labels_bg = {}
-        self.max_bg_intensity = 50 #in %
+        self.max_bg_intensity = 25 #in %
     
     # this is necessary to call before same_class_augmentation()
     # it takes the inverse lookup structure such that we can find 
