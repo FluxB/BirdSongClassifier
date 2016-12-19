@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 def spectrogram(y):
-    spec = librosa.core.stft(y, n_fft=1024)
+    spec = librosa.core.stft(y, n_fft=512)
     return np.abs(spec)
 
 

@@ -24,6 +24,7 @@ class DataPreparator(object):
         self.data_path = data_path
         self.out_path = out_path
         self.chunk_duration = chunk_duration
+        self.pre_chunk_duration = 1024
 
         self.label_dict_lock = mp.Lock()
         self.label_lock = mp.Lock()
@@ -111,7 +112,7 @@ class DataPreparator(object):
         y, sr = librosa.load(wav)
         spec = spectrogram(y)
 
-        spec, bg = self.bg_subtraction(spec)
+        spec, bg = self.bg_subtraction_chunkwise(spec)
 
         chunks = self.make_chunks(spec)
 
@@ -144,6 +145,20 @@ class DataPreparator(object):
 
             pickle.dump(chunk, open(out_fname, "wb"), protocol=2)
 
+    
+    def bg_subtraction_chunkwise(self, s):
+        split_points = [self.pre_chunk_duration * i for i in range(1, s.shape[1] // self.pre_chunk_duration + 1)]
+        s_splits = np.array_split(s, split_points, axis=1)
+        fg_list = []
+        bg_list = []
+        for s_split in s_splits:
+            fg, bg = self.bg_subtraction(s_split)
+            fg_list.append(fg)
+            bg_list.append(bg)
+        
+        return (np.concatenate(fg_list, axis=1), np.concatenate(bg_list, axis=1))
+
+
     def bg_subtraction(self, s):
 
         mask, vector = self.create_mask(s)
@@ -175,7 +190,7 @@ class DataPreparator(object):
 
         # make continous twittering by use of killig vector :)
         vector = np.sum(mask, axis=0) > 0
-        vector = morph.binary_dilation(vector, structure=np.ones((2)), iterations=1)
+        vector = morph.binary_dilation(vector, structure=np.ones((4)), iterations=2)
 
         return mask, vector
 
