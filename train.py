@@ -29,7 +29,7 @@ class Bird(object):
         self.batch_size = 64
         self.queue_size = 2048
 
-        self.nr_epoch = 1
+        self.nr_epoch = 10
         self.preprocessor = Preprocessor(10)
         self.augmenter = AugmentTransform(10, 10)
         self.inverse_labels = {}
@@ -101,8 +101,8 @@ class Bird(object):
         self.nr_files = train_size
 
         self.val_paths = paths[train_size:]
-        self.val_labels = paths[train_size:]
-        self.nr_val_files = nr_files - train_size
+        self.val_labels = labels[train_size:]
+        self.nr_val_files = (nr_files - train_size) // self.batch_size * self.batch_size
 
 
     def train_data_generator(self):
@@ -118,11 +118,22 @@ class Bird(object):
 
 
     def val_data_generator(self):
+        specs = []
+        labels = []
         for val_path, val_label in zip(self.val_paths, self.val_labels):
             sample = self.preprocessor.load_sample(val_path)
             spec = self.preprocessor.preprocess(sample)
             # spec = self.augmenter.augment_transform(spec, val_label)
-            yield (spec[0], val_label)
+            specs.append(np.array([spec[0]]).transpose((1, 2, 0)))
+            labels.append(np.array([val_label]))
+            if len(specs) == self.batch_size:
+                yield (np.array(specs), np.array(labels))
+                specs = []
+                labels = []
+
+        if len(specs) > 0:
+            yield (np.array(specs), np.array(labels))
+
 
     # loads a single new training sample from disc. 
     # preprocesses and augments the training sample.
@@ -149,7 +160,7 @@ class Bird(object):
         progbar = ProgbarLogger()
 
         history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files,
-                                           nb_epoch=10, verbose=1, max_q_size=self.batch_size,
+                                           nb_epoch=self.nr_epoch, verbose=1, max_q_size=self.batch_size,
                                            validation_data=self.val_data_generator(), nb_val_samples=self.nr_val_files,
                                            nb_worker=1, pickle_safe=True)
 

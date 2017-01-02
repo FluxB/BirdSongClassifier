@@ -13,7 +13,7 @@ class AugmentTransform(object):
         self.time_shift = time_shift
         self.inverse_labels = {}
         self.inverse_labels_bg = {}
-        self.max_bg_intensity = 25 #in %
+        self.max_bg_intensity = 0 #in %
     
     # this is necessary to call before same_class_augmentation()
     # it takes the inverse lookup structure such that we can find 
@@ -21,8 +21,9 @@ class AugmentTransform(object):
     # It takes a preprocessor to preprocess the sample we augment with
     # samples_to_add: lower and upper bound for the number of samples with
     # which we augment.
-    def configure_same_class_augmentation(self, inverse_labels,inverse_labels_bg,preprocessor, samples_to_add=[1, 2]):
-        self.inverse_labels_bg = inverse_labels_bg
+    def configure_same_class_augmentation(self, inverse_labels, label_bg_path, preprocessor, samples_to_add=[1, 2]):
+        # self.inverse_labels_bg = inverse_labels_bg
+        self.label_bg_path = label_bg_path
         self.inverse_labels = inverse_labels
         self.preprocessor = preprocessor
         self.samples_to_add = samples_to_add
@@ -60,10 +61,10 @@ class AugmentTransform(object):
         return augmented_spec
 
     def bg_augmentation(self, spec, label):
-        same_class_bg_pool = self.inverse_labels_bg[label]
-        r = random.randint(0, len(same_class_bg_pool) - 1)
+        # same_class_bg_pool = self.inverse_labels_bg[label]
+        r = random.randint(0, len(self.label_bg_path) - 1)
         intensity = float(random.randint(0, self.max_bg_intensity))/100
-        path = same_class_bg_pool[r]
+        path = self.label_bg_path[r]  # same_class_bg_pool[r]
         bg_to_add = intensity * self.preprocessor.load_and_preprocess([path])[0]
         spec = self.__add_two_specs(spec,bg_to_add)
         spec /= np.max(spec)
