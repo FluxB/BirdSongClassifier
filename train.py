@@ -57,7 +57,7 @@ class Bird(object):
             self.inverse_labels.setdefault(label, []).append(path)
 
         self.nb_species = len(self.inverse_labels)
-            
+    
         for line in f_bg:
             line = line.strip()
             (path, label) = line.split(" ")
@@ -76,8 +76,8 @@ class Bird(object):
             first_line_split = first_line.split(" ")
             nb_f_steps = first_line_split[2]
             nb_t_steps = first_line_split[3]
-        self.nb_f_steps = int(nb_f_steps)
-        self.nb_t_steps = int(nb_t_steps)
+        self.nb_f_steps = 128 #  int(nb_f_steps)
+        self.nb_t_steps = 256 #  int(nb_t_steps)
         
         
     # loads and randomizes data
@@ -95,6 +95,11 @@ class Bird(object):
 
         paths = np.array(paths)[mask]
         labels = np.array(labels)[mask]
+
+        self.class_weights = {}
+        for i in range(self.nb_species):
+            weight_mask = labels == str(i)  #  np.equal(labels, i*np.ones(labels.shape))
+            self.class_weights[str(i)] = 1/np.sum(weight_mask)
 
         self.paths = paths[:train_size]
         self.labels = labels[:train_size]
@@ -152,7 +157,7 @@ class Bird(object):
         self.load_data()
         self.model = models.model_paper(self.nb_species,
                                         (self.nb_f_steps, self.nb_t_steps))
-        sgd = SGD(lr=0.05, decay=0.0, momentum=0.9, nesterov=True)
+        sgd = SGD(lr=0.01, decay=0.0, momentum=0.9, nesterov=True)
         self.model.compile(loss='sparse_categorical_crossentropy',optimizer=sgd,metrics=['accuracy'])
         
         self.model.summary()
@@ -162,7 +167,7 @@ class Bird(object):
         history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files,
                                            nb_epoch=self.nr_epoch, verbose=1, max_q_size=self.batch_size,
                                            validation_data=self.val_data_generator(), nb_val_samples=self.nr_val_files,
-                                           nb_worker=1, pickle_safe=True)
+                                           nb_worker=1, pickle_safe=True, class_weight=self.class_weights)
 
 
 

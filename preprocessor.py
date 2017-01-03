@@ -5,6 +5,7 @@ import random
 import numpy as np
 import time
 import scipy.ndimage.morphology as morph
+import scipy.ndimage
 import pickle
 
 class Preprocessor(object):
@@ -40,6 +41,7 @@ class Preprocessor(object):
     def preprocess(self, spectrograms):
         preprocessed_spectrograms = []
         for spec in spectrograms:
+            spec = scipy.ndimage.zoom(spec, 0.5)
             preprocessed_spec = spec
             # preprocessed_spec = np.log(spec**2)
             preprocessed_spec /= np.max(preprocessed_spec)
