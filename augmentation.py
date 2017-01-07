@@ -13,7 +13,7 @@ class AugmentTransform(object):
         self.time_shift = time_shift
         self.inverse_labels = {}
         self.inverse_labels_bg = {}
-        self.max_bg_intensity = 0 #in %
+        self.max_bg_intensity = 40 #in %
     
     # this is necessary to call before same_class_augmentation()
     # it takes the inverse lookup structure such that we can find 
@@ -35,6 +35,7 @@ class AugmentTransform(object):
     def augment_transform(self, spec_batches, labels):
         augmented_specs = []
         for spec, label in zip(spec_batches, labels):
+            augmented_spec = spec
             augmented_spec = self.freq_augmentation(spec)
             augmented_spec = self.time_augmentation(augmented_spec)
             if label in self.inverse_labels.keys():

@@ -112,7 +112,7 @@ class DataPreparator(object):
         y, sr = librosa.load(wav)
         spec = spectrogram(y)
 
-        spec, bg = self.bg_subtraction_chunkwise(spec)
+        spec, bg = self.bg_subtraction(spec)
 
         chunks = self.make_chunks(spec)
 

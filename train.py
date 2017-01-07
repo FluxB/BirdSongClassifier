@@ -57,6 +57,7 @@ class Bird(object):
             self.inverse_labels.setdefault(label, []).append(path)
 
         self.nb_species = len(self.inverse_labels)
+        print(self.nb_species)
     
         for line in f_bg:
             line = line.strip()
@@ -64,7 +65,6 @@ class Bird(object):
  
             self.inverse_labels_bg.setdefault(label, []).append(path)
 
-            
         self.augmenter.configure_same_class_augmentation(self.inverse_labels,self.inverse_labels_bg,self.preprocessor,samples_to_add=[1, 2])
         
         return (paths, labels)
@@ -99,7 +99,11 @@ class Bird(object):
         self.class_weights = {}
         for i in range(self.nb_species):
             weight_mask = labels == str(i)  #  np.equal(labels, i*np.ones(labels.shape))
-            self.class_weights[str(i)] = 1/np.sum(weight_mask)
+            nb_class = np.sum(weight_mask)
+            if nb_class == 0:
+                print("No data for class", str(i))
+                continue
+            self.class_weights[i] = nr_files/np.sum(weight_mask)
 
         self.paths = paths[:train_size]
         self.labels = labels[:train_size]
@@ -127,6 +131,8 @@ class Bird(object):
         labels = []
         for val_path, val_label in zip(self.val_paths, self.val_labels):
             sample = self.preprocessor.load_sample(val_path)
+            if np.max(sample[0]) <= 0:
+                continue
             spec = self.preprocessor.preprocess(sample)
             # spec = self.augmenter.augment_transform(spec, val_label)
             specs.append(np.array([spec[0]]).transpose((1, 2, 0)))
@@ -147,6 +153,8 @@ class Bird(object):
         path = self.paths[r]
         label = self.labels[r]
         sample = self.preprocessor.load_sample(path)
+        if np.max(sample[0]) <= 0:
+            return self.get_random_training_sample()
         spec = self.preprocessor.preprocess(sample)
         spec = self.augmenter.augment_transform(spec, label)
         return (spec[0], label)
@@ -167,7 +175,7 @@ class Bird(object):
         history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files,
                                            nb_epoch=self.nr_epoch, verbose=1, max_q_size=self.batch_size,
                                            validation_data=self.val_data_generator(), nb_val_samples=self.nr_val_files,
-                                           nb_worker=1, pickle_safe=True, class_weight=self.class_weights)
+                                           nb_worker=1, pickle_safe=True)
 
 
 

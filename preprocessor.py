@@ -44,7 +44,8 @@ class Preprocessor(object):
             spec = scipy.ndimage.zoom(spec, 0.5)
             preprocessed_spec = spec
             # preprocessed_spec = np.log(spec**2)
-            preprocessed_spec /= np.max(preprocessed_spec)
+            if np.max(preprocessed_spec) > 0.0:
+                preprocessed_spec /= np.max(preprocessed_spec)
             preprocessed_spectrograms.extend([preprocessed_spec])
 
         return preprocessed_spectrograms

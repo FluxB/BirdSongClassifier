@@ -21,7 +21,7 @@ while not prio_queue.empty():
     print(label, count)
     paths = label_dict[label]
     for path in paths:
-        prominent.write(str.format("{} {}\n", path, label))
+        prominent.write(str.format("{} {}\n", path, str(i)))
 
     i += 1
     if i == number_prominent:
