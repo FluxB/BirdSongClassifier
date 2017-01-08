@@ -58,14 +58,16 @@ class Bird(object):
 
         self.nb_species = len(self.inverse_labels)
         print(self.nb_species)
-    
+        
+        label_bg_paths = []
         for line in f_bg:
             line = line.strip()
             (path, label) = line.split(" ")
  
             self.inverse_labels_bg.setdefault(label, []).append(path)
+            label_bg_paths.append(path)
 
-        self.augmenter.configure_same_class_augmentation(self.inverse_labels,self.inverse_labels_bg,self.preprocessor,samples_to_add=[1, 2])
+        self.augmenter.configure_same_class_augmentation(self.inverse_labels,label_bg_paths,self.preprocessor,samples_to_add=[1, 2])
         
         return (paths, labels)
 
@@ -175,7 +177,7 @@ class Bird(object):
         history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files,
                                            nb_epoch=self.nr_epoch, verbose=1, max_q_size=self.batch_size,
                                            validation_data=self.val_data_generator(), nb_val_samples=self.nr_val_files,
-                                           nb_worker=1, pickle_safe=True)
+                                           nb_worker=4, pickle_safe=True)
 
 
 

@@ -35,13 +35,12 @@ class AugmentTransform(object):
     def augment_transform(self, spec_batches, labels):
         augmented_specs = []
         for spec, label in zip(spec_batches, labels):
-            augmented_spec = spec
             augmented_spec = self.freq_augmentation(spec)
             augmented_spec = self.time_augmentation(augmented_spec)
             if label in self.inverse_labels.keys():
                 augmented_spec = self.same_class_augmentation(augmented_spec, label)
-            if label in self.inverse_labels_bg.keys():
-                augmented_spec = self.bg_augmentation(augmented_spec, label)
+            # if label in self.inverse_labels_bg.keys():
+            augmented_spec = self.bg_augmentation(augmented_spec, label)
             augmented_specs.extend([augmented_spec])
 
         return augmented_specs
@@ -63,12 +62,13 @@ class AugmentTransform(object):
 
     def bg_augmentation(self, spec, label):
         # same_class_bg_pool = self.inverse_labels_bg[label]
-        r = random.randint(0, len(self.label_bg_path) - 1)
-        intensity = float(random.randint(0, self.max_bg_intensity))/100
-        path = self.label_bg_path[r]  # same_class_bg_pool[r]
-        bg_to_add = intensity * self.preprocessor.load_and_preprocess([path])[0]
-        spec = self.__add_two_specs(spec,bg_to_add)
-        spec /= np.max(spec)
+        for i in range(3):
+            r = random.randint(0, len(self.label_bg_path) - 1)
+            intensity = float(random.randint(0, self.max_bg_intensity))/100
+            path = self.label_bg_path[r]  # same_class_bg_pool[r]
+            bg_to_add = intensity * self.preprocessor.load_and_preprocess([path])[0]
+            spec = self.__add_two_specs(spec,bg_to_add)
+            spec /= np.max(spec)
 
         return spec
         
