@@ -2,10 +2,11 @@ import librosa
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
+import scipy.signal
 
 
 def spectrogram(y):
-    spec = librosa.core.stft(y, n_fft=512)
+    spec = librosa.core.stft(y, n_fft=512, window=scipy.signal.hanning)
     return np.abs(spec)
 
 

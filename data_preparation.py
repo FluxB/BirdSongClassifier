@@ -161,7 +161,7 @@ class DataPreparator(object):
 
     def bg_subtraction(self, s):
 
-        mask, vector = self.create_mask(s)
+        mask, vector = self.create_mask(s, threshold=3.0)
 
         # s_bg = np.array(s,copy=True)
 
@@ -169,19 +169,21 @@ class DataPreparator(object):
         # s[np.logical_not(mask)] = 0
         s_signal = s[..., vector]
 
+        mask, vector = self.create_mask(s, threshold=2.5)
+
         # background projection
         s_bg = s[..., np.logical_not(vector)]
 
         return s_signal, s_bg
 
-    def create_mask(self, s):  # Creates mask to kill background noise and quiet times
+    def create_mask(self, s, threshold=3.0):  # Creates mask to kill background noise and quiet times
         nb_f, nb_t = len(s[:, 0]), len(s[0, :])
 
         # Set to zero values smaller than 3 times fixed-t-median or smaller 3 times fixed-f-median
         m_f = np.tile(np.median(s, axis=0), (nb_f, 1))
         m_t = np.transpose(np.tile(np.transpose(np.median(s, axis=1)), (nb_t, 1)))
 
-        mask_inv = np.logical_or((s < 3 * m_f), (s < 3 * m_t))
+        mask_inv = np.logical_or((s < threshold * m_f), (s < threshold * m_t))
         mask = np.logical_not(mask_inv)
 
         # morphological trafos: dilation and erosion
