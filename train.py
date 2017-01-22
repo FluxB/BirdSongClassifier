@@ -1,4 +1,5 @@
 import sys
+import os
 from preprocessor import Preprocessor
 from augmentation import AugmentTransform
 import numpy as np
@@ -13,19 +14,22 @@ from keras.utils import np_utils
 from keras.utils import generic_utils
 from keras.optimizers import SGD
 import models
-from keras.callbacks import ProgbarLogger
+import keras.callbacks
 
 
 # main class of programm, starts and organizes the training
 class Bird(object):
 
     # label_path: path to label file which holds the path of all samples and their class id
-    def __init__(self, label_path,label_bg_path, meta_path, output_path):
+    def __init__(self, label_path,label_bg_path, meta_path, training_description):
         self.label_path = label_path
         self.label_bg_path = label_bg_path
         self.meta_path = meta_path
-        self.output_path = output_path
+        self.training_description = training_description
         
+        if not os.path.isdir(self.training_description):
+            os.mkdir(self.training_description)
+
         self.batch_size = 64
         self.queue_size = 2048
 
@@ -172,12 +176,14 @@ class Bird(object):
         
         self.model.summary()
 
-        progbar = ProgbarLogger()
+        modelCheckpoint = keras.callbacks.ModelCheckpoint("/" + self.training_description + "/{epoch:02d}-{val_loss:.2f}.hdf5")
+        reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=2, verbose=1,
+                                                      min_lr=0.0001, epsilon=1e-5)
 
         history = self.model.fit_generator(self.train_data_generator(), samples_per_epoch=self.nr_files,
                                            nb_epoch=self.nr_epoch, verbose=1, max_q_size=self.batch_size,
                                            validation_data=self.val_data_generator(), nb_val_samples=self.nr_val_files,
-                                           nb_worker=4, pickle_safe=True)
+                                           nb_worker=4, pickle_safe=True, callbacks=[modelCheckpoint, reduce_lr])
 
 
 
@@ -186,7 +192,7 @@ if __name__ == "__main__":
     label_path = sys.argv[1]
     label_bg_path = sys.argv[2]
     meta_path = sys.argv[3]
-    output_path = sys.argv[4]
-    bird = Bird(label_path,label_bg_path,meta_path,output_path)
+    training_description = sys.argv[4]
+    bird = Bird(label_path,label_bg_path,meta_path,training_description)
     bird.train()
             
