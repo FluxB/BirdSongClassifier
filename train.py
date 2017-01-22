@@ -169,7 +169,7 @@ class Bird(object):
     # start training process
     def train(self):
         self.load_data()
-        self.model = models.model_paper(self.nb_species,
+        self.model = models.model_fg_bg(self.nb_species,
                                         (self.nb_f_steps, self.nb_t_steps))
         sgd = SGD(lr=0.01, decay=0.0, momentum=0.9, nesterov=True)
         self.model.compile(loss='sparse_categorical_crossentropy',optimizer=sgd,metrics=['accuracy'])
